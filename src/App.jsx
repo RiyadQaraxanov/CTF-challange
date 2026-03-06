@@ -1,4 +1,5 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -9,15 +10,13 @@ import Timeline from './components/Timeline';
 import WinConditions from './components/WinConditions';
 import Footer from './components/Footer';
 import Background from './components/Background';
-
 import Register from './components/Register';
+import LegalPage from './components/LegalPage';
+import AdminPanel from './components/AdminPanel';
 
-function App() {
-  return (
-    <div className="relative min-h-screen">
-      <Background />
+const LandingPage = () => (
+    <>
       <Navbar />
-      
       <main>
         <Hero />
         <About />
@@ -33,9 +32,23 @@ function App() {
         <WinConditions />
         <Register />
       </main>
-
       <Footer />
-    </div>
+    </>
+);
+
+function App() {
+  return (
+    <Router>
+      <div className="relative min-h-screen">
+        <Background />
+        
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/legal/:type" element={<LegalPage />} />
+          <Route path="/admin" element={<AdminPanel />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
