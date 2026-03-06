@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@layer theme {
+  :root {
+    --font-sans: 'Space Grotesk', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    
+    --color-neon-blue: #00e5ff;
+    --color-neon-red: #ff2d55;
+    --color-cyber-dark: #020617;
+    --color-cyber-card: #0f172a;
+    --color-cyber-border: #1e293b;
+  }
+}
+
+@theme {
+  --color-neon-blue: var(--color-neon-blue);
+  --color-neon-red: var(--color-neon-red);
+  --color-cyber-dark: var(--color-cyber-dark);
+  --color-cyber-card: var(--color-cyber-card);
+  --color-cyber-border: var(--color-cyber-border);
+  
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@layer base {
+  body {
+    @apply bg-cyber-dark text-slate-300 font-sans selection:bg-neon-blue/30;
+    overflow-x: hidden;
+  }
+  
+  h1, h2, h3, h4 {
+    @apply text-white font-bold tracking-tight;
+  }
+
+  .cyber-grid {
+    background-image: 
+      linear-gradient(to right, rgba(0, 229, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+  
+  .neon-shadow-blue {
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+  }
+  
+  .neon-shadow-red {
+    box-shadow: 0 0 15px rgba(255, 45, 85, 0.3);
+  }
+  
+  .reveal-hidden {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-cyber-dark;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-800 rounded-full hover:bg-neon-blue/50 transition-colors;
+}
