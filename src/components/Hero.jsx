@@ -71,6 +71,7 @@ const Hero = () => {
 
         <button 
           className="group relative px-10 py-4 border border-slate-700 bg-transparent rounded-md overflow-hidden transition-all duration-300 hover:border-neon-red transform hover:-translate-y-1"
+          onClick={() => document.getElementById('register')?.scrollIntoView({ behavior: 'smooth' })}
         >
           <div className="absolute top-0 left-0 w-full h-full bg-neon-red/10 scale-0 group-hover:scale-100 origin-center transition-transform duration-300 rounded-md"></div>
           <span className="relative font-bold uppercase tracking-widest text-white group-hover:text-neon-red flex items-center transition-colors">

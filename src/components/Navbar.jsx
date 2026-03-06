@@ -18,7 +18,7 @@ const Navbar = () => {
     { name: 'Konsept', href: '#concept' },
     { name: 'Zaman Çizelgesi', href: '#timeline' },
     { name: 'Qaydalar', href: '#win-conditions' },
-    { name: 'Qeydiyyat', href: '#hero', important: true },
+    { name: 'Qeydiyyat', href: '#register', important: true },
   ];
 
   return (
