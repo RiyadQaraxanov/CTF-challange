@@ -13,6 +13,8 @@ import Background from './components/Background';
 import Register from './components/Register';
 import LegalPage from './components/LegalPage';
 import AdminPanel from './components/AdminPanel';
+import PageLogger from './components/PageLogger';
+import DiscordHandler from './components/DiscordHandler';
 
 const LandingPage = () => (
     <>
@@ -39,6 +41,8 @@ const LandingPage = () => (
 function App() {
   return (
     <Router>
+      <PageLogger />
+      <DiscordHandler />
       <div className="relative min-h-screen">
         <Background />
         
