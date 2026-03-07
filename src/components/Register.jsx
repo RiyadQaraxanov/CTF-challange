@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import anime from 'animejs/lib/anime.es.js';
 import { User, Mail, GraduationCap, MessageSquare, Shield, Zap, ChevronRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { useScrollParallax } from '../hooks/useScrollParallax';
 import api from '../api/axios';
 
 const Register = () => {
@@ -14,6 +15,15 @@ const Register = () => {
     const [status, setStatus] = useState('idle'); // idle, submitting, success, error
     const [errorMessage, setErrorMessage] = useState('');
     const formRef = useRef(null);
+    
+    // Parallax Refs
+    const textRef = useRef(null);
+    const blueBlobRef = useRef(null);
+    const redBlobRef = useRef(null);
+
+    useScrollParallax(textRef, -0.05);
+    useScrollParallax(blueBlobRef, 0.2);
+    useScrollParallax(redBlobRef, 0.15);
 
     useEffect(() => {
         anime({
@@ -87,11 +97,11 @@ const Register = () => {
 
     return (
         <section id="register" className="relative py-24 px-6 overflow-hidden">
-            <div className="absolute top-1/4 -left-20 w-64 h-64 bg-neon-blue/10 blur-[100px] rounded-full"></div>
-            <div className="absolute bottom-1/4 -right-20 w-64 h-64 bg-neon-red/10 blur-[100px] rounded-full"></div>
+            <div ref={blueBlobRef} className="absolute top-1/4 -left-20 w-64 h-64 bg-neon-blue/10 blur-[100px] rounded-full will-change-transform"></div>
+            <div ref={redBlobRef} className="absolute bottom-1/4 -right-20 w-64 h-64 bg-neon-red/10 blur-[100px] rounded-full will-change-transform"></div>
             
             <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
-                <div className="register-fade-in">
+                <div ref={textRef} className="register-fade-in will-change-transform">
                     <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-neon-blue/30 bg-neon-blue/5 text-neon-blue text-[10px] font-mono uppercase tracking-[0.2em] mb-8">
                         <Zap className="w-3 h-3 mr-2" /> Qəbul Açıqdır
                     </div>

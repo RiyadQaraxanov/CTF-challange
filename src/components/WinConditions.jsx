@@ -1,9 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import anime from 'animejs/lib/anime.es.js';
 import { Trophy, TrendingUp, Skull, ShieldCheck } from 'lucide-react';
+import { useScrollParallax } from '../hooks/useScrollParallax';
 
 const WinConditions = () => {
     const sectionRef = useRef(null);
+    const titleRef = useRef(null);
+    const redCardRef = useRef(null);
+    const blueCardRef = useRef(null);
+
+    useScrollParallax(titleRef, 0.05);
+    useScrollParallax(redCardRef, 0.08);
+    useScrollParallax(blueCardRef, 0.12);
 
     useEffect(() => {
         const observer = new IntersectionObserver((entries) => {
@@ -25,8 +33,8 @@ const WinConditions = () => {
     }, []);
 
     return (
-        <section id="win-conditions" ref={sectionRef} className="py-24 px-6 bg-cyber-card/50 relative">
-            <div className="max-w-7xl mx-auto text-center mb-16">
+        <section id="win-conditions" ref={sectionRef} className="py-24 px-6 bg-cyber-card/50 relative overflow-hidden">
+            <div ref={titleRef} className="max-w-7xl mx-auto text-center mb-16 will-change-transform">
                  <h2 className="text-4xl md:text-5xl tracking-tighter font-extrabold mb-4 uppercase">
                     QALİBİYYƏT <span className="text-neon-red">ŞƏRTLƏRİ</span>
                 </h2>
@@ -35,7 +43,7 @@ const WinConditions = () => {
 
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 text-left">
                 {/* Red Side */}
-                <div className="win-card opacity-0 bg-cyber-card p-10 relative overflow-hidden group border-2 border-neon-red/20 hover:border-neon-red transition-all duration-500 rounded-3xl">
+                <div ref={redCardRef} className="win-card opacity-0 bg-cyber-card p-10 relative overflow-hidden group border-2 border-neon-red/20 hover:border-neon-red transition-all duration-500 rounded-3xl will-change-transform">
                      <div className="absolute top-[-20%] right-[-10%] opacity-5 rotate-12 transition-transform group-hover:scale-110">
                         <Skull size={300} />
                     </div>
@@ -55,7 +63,7 @@ const WinConditions = () => {
                 </div>
 
                 {/* Blue Side */}
-                <div className="win-card opacity-0 bg-cyber-card p-10 relative overflow-hidden group border-2 border-neon-blue/20 hover:border-neon-blue transition-all duration-500 rounded-3xl">
+                <div ref={blueCardRef} className="win-card opacity-0 bg-cyber-card p-10 relative overflow-hidden group border-2 border-neon-blue/20 hover:border-neon-blue transition-all duration-500 rounded-3xl will-change-transform">
                     <div className="absolute top-[-20%] right-[-10%] opacity-5 rotate-12 transition-transform group-hover:scale-110">
                         <ShieldCheck size={300} />
                     </div>

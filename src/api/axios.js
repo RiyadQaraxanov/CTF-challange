@@ -1,14 +1,23 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'https://ctf-challange-back.onrender.com',
-    withCredentials: true, // Crucial for sending/receiving cookies
+    baseURL: 'http://localhost:5000',
+    withCredentials: true, // Crucial for sending/receiving cookies automatically
 });
 
-// Request interceptor to add the access token
+// Request interceptor to manually add token from cookie if needed
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('accessToken');
+        // Cookie-dən accessToken-i oxumaq (HttpOnly olmayan hissə üçün və ya fallback olaraq)
+        // Lakin HttpOnly cookie brauzer tərəfindən idarə olunmalıdır.
+        // Əgər backend-də "accessToken" cookie-si HttpOnly: false olarsa bura kömək edəcək.
+        const getCookie = (name) => {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        };
+
+        const token = getCookie('access_token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -32,24 +41,15 @@ api.interceptors.response.use(
             originalRequest._retry = true;
             
             try {
-                const refreshToken = localStorage.getItem('refreshToken');
-                // Attempt to refresh the token using body
-                const res = await api.post('/auth/refresh', { refreshToken });
+                // Attempt to refresh the token. 
+                // The refresh_token cookie will be sent automatically.
+                await api.post('/auth/refresh', {});
                 
-                if (res.data?.accessToken) {
-                    localStorage.setItem('accessToken', res.data.accessToken);
-                }
-                if (res.data?.refreshToken) {
-                    localStorage.setItem('refreshToken', res.data.refreshToken);
-                }
-
-                // Retry the original request with new token
-                originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
+                // If successful, the new jwt cookie is automatically set by the server.
+                // Retry the original request without needing to manually set headers.
                 return api(originalRequest);
             } catch (refreshError) {
-                // If refresh fails, clear tokens and let the component handle the error
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
+                // If refresh fails, let the component handle the error and redirect to login
                 return Promise.reject(refreshError);
             }
         }

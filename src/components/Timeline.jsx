@@ -1,9 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import anime from 'animejs/lib/anime.es.js';
 import { Clock, Lock, Unlock, Trophy } from 'lucide-react';
+import { useScrollParallax } from '../hooks/useScrollParallax';
 
 const Timeline = () => {
     const timelineRef = useRef(null);
+    const titleRef = useRef(null);
+    const lineRef = useRef(null);
+
+    useScrollParallax(titleRef, 0.05);
+    useScrollParallax(lineRef, 0.15);
 
     useEffect(() => {
         const observer = new IntersectionObserver((entries) => {
@@ -65,7 +71,7 @@ const Timeline = () => {
     return (
         <section id="timeline" ref={timelineRef} className="py-24 px-6 bg-cyber-dark overflow-hidden">
             <div className="max-w-4xl mx-auto">
-                 <div className="text-center mb-24">
+                 <div ref={titleRef} className="text-center mb-24 will-change-transform">
                     <h2 className="text-4xl md:text-5xl tracking-tighter font-extrabold mb-4 uppercase">
                         TƏDBİR <span className="text-neon-blue">CƏDVƏLİ</span>
                     </h2>
@@ -76,7 +82,7 @@ const Timeline = () => {
 
                 <div className="relative">
                     {/* Vertical Line */}
-                    <div className="timeline-line absolute left-8 top-0 bottom-0 w-[2px] bg-gradient-to-b from-neon-blue via-neon-red to-transparent origin-top"></div>
+                    <div ref={lineRef} className="timeline-line absolute left-8 top-0 bottom-0 w-[2px] bg-gradient-to-b from-neon-blue via-neon-red to-transparent origin-top will-change-transform"></div>
 
                     <div className="space-y-16">
                         {events.map((event, idx) => (

@@ -1,9 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import anime from 'animejs/lib/anime.es.js';
 import { Terminal, Copy, Check } from 'lucide-react';
+import { useScrollParallax } from '../hooks/useScrollParallax';
 
 const FlagSystem = () => {
   const codeRef = useRef(null);
+  const titleRef = useRef(null);
+  const terminalBlockRef = useRef(null);
+
+  useScrollParallax(titleRef, 0.05);
+  useScrollParallax(terminalBlockRef, 0.1);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -37,7 +43,7 @@ curl -X POST https://api.server-sec.event/verify \\
   return (
     <section id="flag-system" className="py-24 px-6 bg-cyber-dark relative">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center space-x-4 mb-12">
+        <div ref={titleRef} className="flex items-center space-x-4 mb-12 will-change-transform">
             <div className="p-3 bg-neon-red/10 rounded-lg">
                 <Terminal className="text-neon-red" />
             </div>
@@ -47,7 +53,7 @@ curl -X POST https://api.server-sec.event/verify \\
             </div>
         </div>
 
-        <div className="bg-[#0b0f1a] rounded-xl border border-cyber-border overflow-hidden shadow-2xl">
+        <div ref={terminalBlockRef} className="bg-[#0b0f1a] rounded-xl border border-cyber-border overflow-hidden shadow-2xl will-change-transform">
           <div className="bg-cyber-card px-4 py-2 flex items-center justify-between border-b border-cyber-border">
             <div className="flex space-x-1.5">
               <div className="w-3 h-3 rounded-full bg-red-500/50"></div>

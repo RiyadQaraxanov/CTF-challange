@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { ShieldCheck, Crosshair, HelpCircle, Server, Code, FileSearch, ShieldAlert, Terminal } from 'lucide-react';
+import { useScrollParallax } from '../hooks/useScrollParallax';
 
 const TeamDetail = ({ team, colorClass, title, desc, tasks, icon: Icon }) => {
   const bgColor = team === 'blue' ? 'bg-neon-blue/5' : 'bg-neon-red/5';
@@ -9,11 +10,17 @@ const TeamDetail = ({ team, colorClass, title, desc, tasks, icon: Icon }) => {
   const iconBorder = team === 'blue' ? 'border-neon-blue/20' : 'border-neon-red/20';
   const hoverBorder = team === 'blue' ? 'hover:border-neon-blue' : 'hover:border-neon-red';
 
+  const iconRef = useRef(null);
+  const tasksRef = useRef(null);
+  
+  useScrollParallax(iconRef, 0.08);
+  useScrollParallax(tasksRef, 0.12);
+
   return (
     <div className={`py-16 md:py-24 px-6 relative overflow-hidden`}>
       <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] ${bgColor} blur-[120px] rounded-full pointer-events-none`}></div>
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12 relative z-10">
-        <div className={`md:w-1/2 mb-8 md:mb-0`}>
+        <div ref={iconRef} className={`md:w-1/2 mb-8 md:mb-0 will-change-transform`}>
           <div className={`w-20 h-20 md:w-32 md:h-32 mb-8 ${iconBg} rounded-2xl flex items-center justify-center border ${iconBorder} group`}>
             <Icon className={`w-10 h-10 md:w-16 md:h-16 ${textColor} transition-transform group-hover:scale-110`} />
           </div>
@@ -22,7 +29,7 @@ const TeamDetail = ({ team, colorClass, title, desc, tasks, icon: Icon }) => {
           </h2>
           <p className="text-xl text-slate-400 mb-8 max-w-lg leading-relaxed">{desc}</p>
         </div>
-        <div className="md:w-1/2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div ref={tasksRef} className="md:w-1/2 grid grid-cols-1 sm:grid-cols-2 gap-6 will-change-transform">
           {tasks.map((task, idx) => (
             <div key={idx} className={`bg-cyber-card p-6 border border-cyber-border ${hoverBorder} transition-all duration-300 rounded-xl`}>
                <div className={`${textColor} mb-4`}>{task.icon}</div>

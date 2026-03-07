@@ -1,25 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { 
-    Lock, User, Shield, Terminal, Users, List, 
-    LogOut, AlertCircle, Activity, Search, Filter,
-    CheckCircle2, XCircle, Clock, Loader2, Mail,
-    ChevronLeft, ChevronRight, X, Eye
+    Shield, Terminal, Users, List, LogOut, Activity, Search,
+    CheckCircle2, XCircle, ChevronLeft, ChevronRight, X, Eye, Trash2, Loader2
 } from 'lucide-react';
-import anime from 'animejs/lib/anime.es.js';
-import { Link, useNavigate } from 'react-router-dom';
-import api from '../api/axios';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuthStore } from '../store/useAuthStore';
+import { userService } from '../services/user.service';
+import { logService } from '../services/log.service';
 
 const AdminPanel = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [loginData, setLoginData] = useState({ username: '', password: '' });
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
+    const { isLoggedIn, logout, checkAuth, isLoading: authLoading } = useAuthStore();
     const [activeTab, setActiveTab] = useState('users'); // 'users' or 'logs'
-    
     const [users, setUsers] = useState([]);
     const [logs, setLogs] = useState([]);
     const [stats, setStats] = useState({ totalVisits: 0, uniqueVisitors: 0 });
     const [selectedUser, setSelectedUser] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [processingId, setProcessingId] = useState(null);
+    const [deleteModal, setDeleteModal] = useState({ isOpen: false, userId: null, reason: '', isDeleting: false });
     
     // Pagination & Filters
     const [page, setPage] = useState(1);
@@ -35,101 +33,85 @@ const AdminPanel = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                await api.get('/auth/check');
-                setIsLoggedIn(true);
-            } catch (err) {
-                // Not logged in or token expired
-                setIsLoggedIn(false);
-            }
+        const init = async () => {
+            await checkAuth();
         };
-        checkAuth();
-    }, []);
+        init();
+    }, [checkAuth]);
 
     useEffect(() => {
-        if (!isLoggedIn) {
-            anime({
-                targets: '.admin-login-fade',
-                opacity: [0, 1],
-                translateY: [20, 0],
-                delay: anime.stagger(100),
-                easing: 'easeOutExpo',
-                duration: 800
-            });
-        } else {
+        if (!authLoading && !isLoggedIn) {
+            navigate('/admin/login');
+        }
+    }, [isLoggedIn, authLoading, navigate]);
+
+    useEffect(() => {
+        if (isLoggedIn) {
             fetchData();
         }
     }, [isLoggedIn, activeTab, page]);
 
     const fetchData = async () => {
+        setLoading(true);
         try {
             const limit = 20;
             const params = { page, limit, ...filters };
             
             if (activeTab === 'users') {
-                const res = await api.get('/users', { params });
-                setUsers(res.data.data);
-                setTotalItems(res.data.total);
+                const data = await userService.getAll(params);
+                setUsers(data.data);
+                setTotalItems(data.total);
             } else {
-                const res = await api.get('/logs', { params });
-                setLogs(res.data.data);
-                setTotalItems(res.data.total);
+                const data = await logService.getAll(params);
+                setLogs(data.data);
+                setTotalItems(data.total);
                 
-                const statsRes = await api.get('/logs/stats');
-                setStats(statsRes.data);
+                const statsData = await logService.getStats();
+                setStats(statsData);
             }
         } catch (err) {
             console.error('Data fetch error:', err);
-            if (err.response?.status === 401) setIsLoggedIn(false);
+            if (err.response?.status === 401) logout();
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
-        setPage(1); // Reset to first page on filter change
-    };
-
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
-        
-        try {
-            const res = await api.post('/auth/login', loginData);
-            if (res.data?.accessToken) {
-                localStorage.setItem('accessToken', res.data.accessToken);
-            }
-            if (res.data?.refreshToken) {
-                localStorage.setItem('refreshToken', res.data.refreshToken);
-            }
-            setIsLoggedIn(true);
-        } catch (err) {
-            setError(err.response?.data?.message || 'Giriş uğursuz oldu.');
-            // shake card ...
-        } finally {
-            setLoading(false);
-        }
+        setPage(1);
     };
 
     const handleStatusUpdate = async (userId, newStatus) => {
+        setProcessingId(userId);
         try {
-            await api.patch(`/users/${userId}/status`, { status: newStatus });
+            await userService.updateStatus(userId, newStatus);
             setUsers(users.map(u => u.id === userId ? { ...u, status: newStatus } : u));
         } catch (err) {
             alert('Status yenilənmədi.');
+        } finally {
+            setProcessingId(null);
+        }
+    };
+
+    const handleDeleteUser = async () => {
+        if (!deleteModal.reason.trim()) return alert('Səbəb mütləq qeyd olunmalıdır!');
+        setDeleteModal(prev => ({ ...prev, isDeleting: true }));
+
+        try {
+            await userService.softDelete(deleteModal.userId, deleteModal.reason);
+            setUsers(users.filter(u => u.id !== deleteModal.userId));
+            setDeleteModal({ isOpen: false, userId: null, reason: '', isDeleting: false });
+        } catch (err) {
+            alert('Silinmə zamanı xəta baş verdi.');
+            setDeleteModal(prev => ({ ...prev, isDeleting: false }));
         }
     };
 
     const handleLogout = async () => {
-        try {
-            await api.post('/auth/logout');
-        } catch (e) {}
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        setIsLoggedIn(false);
-        setLoginData({ username: '', password: '' });
+        await logout();
+        navigate('/admin/login');
     };
 
     useEffect(() => {
@@ -139,79 +121,7 @@ const AdminPanel = () => {
         return () => clearTimeout(timer);
     }, [filters]);
 
-    if (!isLoggedIn) {
-        return (
-            <div className="min-h-screen flex items-center justify-center p-6 bg-[#020617] relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-neon-blue/5 blur-[150px] rounded-full"></div>
-                <div className="absolute bottom-0 left-0 w-96 h-96 bg-neon-red/5 blur-[150px] rounded-full"></div>
-                
-                <div className="login-card w-full max-w-md bg-cyber-card/80 backdrop-blur-xl border border-cyber-border rounded-xl p-10 shadow-2xl relative z-10">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-neon-blue to-neon-red"></div>
-                    
-                    <div className="text-center mb-10">
-                        <div className="inline-flex p-4 bg-neon-blue/10 rounded-full mb-4 border border-neon-blue/20">
-                            <Shield className="w-10 h-10 text-neon-blue" />
-                        </div>
-                        <h1 className="text-2xl font-black text-white uppercase tracking-[0.3em]">System<span className="text-neon-blue">Admin</span></h1>
-                        <p className="text-slate-500 text-[10px] mt-2 font-mono uppercase tracking-widest">Authorized Access Only</p>
-                    </div>
-
-                    <form onSubmit={handleLogin} className="space-y-6">
-                        <div className="admin-login-fade space-y-2">
-                            <label className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold ml-1">Administrator ID</label>
-                            <div className="relative group">
-                                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600 transition-colors group-focus-within:text-neon-blue" />
-                                <input 
-                                    type="text" 
-                                    value={loginData.username}
-                                    onChange={(e) => setLoginData({...loginData, username: e.target.value})}
-                                    className="w-full bg-slate-900/50 border border-slate-800 rounded py-4 pl-12 pr-4 text-white placeholder:text-slate-800 focus:outline-none focus:border-neon-blue transition-all font-mono text-sm"
-                                    placeholder="UID_ACCESS"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="admin-login-fade space-y-2">
-                            <label className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold ml-1">Private Key</label>
-                            <div className="relative group">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600 transition-colors group-focus-within:text-neon-blue" />
-                                <input 
-                                    type="password" 
-                                    value={loginData.password}
-                                    onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                                    className="w-full bg-slate-900/50 border border-slate-800 rounded py-4 pl-12 pr-4 text-white placeholder:text-slate-800 focus:outline-none focus:border-neon-blue transition-all font-mono text-sm"
-                                    placeholder="••••••••"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        {error && (
-                            <div className="admin-login-fade bg-neon-red/10 border border-neon-red/30 p-4 rounded text-neon-red text-[10px] font-bold uppercase tracking-widest flex items-center animate-pulse">
-                                <AlertCircle className="w-4 h-4 mr-3 flex-shrink-0" />
-                                {error}
-                            </div>
-                        )}
-
-                        <button 
-                            type="submit"
-                            disabled={loading}
-                            className="admin-login-fade w-full py-4 bg-neon-blue text-cyber-dark font-black uppercase tracking-[0.3em] rounded hover:neon-shadow-blue transition-all flex items-center justify-center text-xs"
-                        >
-                            {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : 'Sistemə Giriş'}
-                        </button>
-                    </form>
-                    
-                    <div className="mt-10 text-center">
-                        <Link to="/" className="text-[10px] text-slate-600 hover:text-white uppercase tracking-widest transition-colors font-mono">
-                            [ Geri qayıt ]
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    if (authLoading || !isLoggedIn) return null;
 
     return (
         <div className="min-h-screen bg-[#020617] text-slate-300 font-mono text-xs">
@@ -259,13 +169,22 @@ const AdminPanel = () => {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
                     <div>
                         <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-3">
-                            {activeTab === 'users' ? '> User_Database_Access' : '> System_Activity_Logs'}
+                            {activeTab === 'users' ? "{'>'} User_Database_Access" : "{'>'} System_Activity_Logs"}
                         </h2>
                         <div className="flex items-center text-[10px] text-slate-500 uppercase tracking-[.3em]">
                             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse mr-3 shadow-[0_0_8px_#22c55e]"></div>
                             Status: Secure_Connection_Established | {new Date().toLocaleTimeString()}
                         </div>
                     </div>
+                    {activeTab === 'users' && (
+                        <Link 
+                            to="/admin/deleted-users"
+                            className="flex items-center space-x-2 px-6 py-3 bg-neon-red/10 border border-neon-red/30 text-neon-red rounded hover:bg-neon-red/20 transition-all font-bold uppercase tracking-widest text-[10px]"
+                        >
+                            <Trash2 size={14} />
+                            <span>Silinmiş İstİfadəçİlər</span>
+                        </Link>
+                    )}
                 </div>
 
                 {/* Dashboard Stats */}
@@ -352,7 +271,19 @@ const AdminPanel = () => {
                     <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-neon-blue/50 via-neon-red/50 to-neon-blue/50"></div>
                     
                     <div className="overflow-x-auto">
-                        {activeTab === 'users' ? (
+                        {loading ? (
+                            <div className="p-8 space-y-4">
+                                {[...Array(5)].map((_, i) => (
+                                    <div key={i} className="flex space-x-4 animate-pulse">
+                                        <div className="h-12 bg-slate-800 rounded flex-1"></div>
+                                        <div className="h-12 bg-slate-800 rounded w-24"></div>
+                                        <div className="h-12 bg-slate-800 rounded w-32"></div>
+                                        <div className="h-12 bg-slate-800 rounded w-24"></div>
+                                        <div className="h-12 bg-slate-800 rounded w-32"></div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : activeTab === 'users' ? (
                             <table className="w-full text-left border-collapse">
                                 <thead className="bg-slate-900/80 border-b border-cyber-border text-[10px] uppercase tracking-[0.3em] font-black text-slate-500">
                                     <tr>
@@ -391,17 +322,19 @@ const AdminPanel = () => {
                                                         <>
                                                             <button 
                                                                 onClick={() => handleStatusUpdate(user.id, 'approved')}
-                                                                className="p-2 border border-green-500/30 text-green-500 hover:bg-green-500/10 rounded transition-all"
+                                                                disabled={processingId === user.id}
+                                                                className="p-2 border border-green-500/30 text-green-500 hover:bg-green-500/10 rounded transition-all disabled:opacity-50"
                                                                 title="Təsdiqlə"
                                                             >
-                                                                <CheckCircle2 size={16} />
+                                                                {processingId === user.id ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
                                                             </button>
                                                             <button 
                                                                 onClick={() => handleStatusUpdate(user.id, 'rejected')}
-                                                                className="p-2 border border-neon-red/30 text-neon-red hover:bg-neon-red/10 rounded transition-all"
+                                                                disabled={processingId === user.id}
+                                                                className="p-2 border border-neon-red/30 text-neon-red hover:bg-neon-red/10 rounded transition-all disabled:opacity-50"
                                                                 title="Rədd et"
                                                             >
-                                                                <XCircle size={16} />
+                                                                {processingId === user.id ? <Loader2 size={16} className="animate-spin" /> : <XCircle size={16} />}
                                                             </button>
                                                         </>
                                                     )}
@@ -411,6 +344,13 @@ const AdminPanel = () => {
                                                         title="Detallar"
                                                     >
                                                         <Eye size={16} />
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => setDeleteModal({ isOpen: true, userId: user.id, reason: '' })}
+                                                        className="p-2 border border-neon-red/30 text-neon-red hover:bg-neon-red/10 rounded transition-all"
+                                                        title="İstifadəçini Sil"
+                                                    >
+                                                        <Trash2 size={16} />
                                                     </button>
                                                 </div>
                                             </td>
@@ -475,7 +415,7 @@ const AdminPanel = () => {
                             </button>
                             <div className="flex items-center space-x-2">
                                 {[...Array(Math.min(5, Math.ceil(totalItems / 20)))].map((_, i) => {
-                                    const p = i + 1; // Simplified for now
+                                    const p = i + 1;
                                     return (
                                         <button
                                             key={p}
@@ -486,7 +426,6 @@ const AdminPanel = () => {
                                         </button>
                                     );
                                 })}
-                                {Math.ceil(totalItems / 20) > 5 && <span className="text-slate-700">...</span>}
                             </div>
                             <button 
                                 disabled={page >= Math.ceil(totalItems / 20)}
@@ -584,6 +523,57 @@ const AdminPanel = () => {
                                         </button>
                                     </>
                                 )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Custom Delete Modal */}
+                {deleteModal.isOpen && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
+                        <div className="bg-cyber-card border border-neon-red/30 w-full max-w-md rounded-lg overflow-hidden relative shadow-[0_0_50px_rgba(255,51,51,0.2)]">
+                            <div className="absolute top-0 left-0 w-full h-1 bg-neon-red"></div>
+                            
+                            <div className="p-8 border-b border-cyber-border flex justify-between items-center">
+                                <h3 className="text-xl font-black text-white uppercase tracking-tighter flex items-center">
+                                    <Trash2 size={20} className="mr-3 text-neon-red" /> 
+                                    USER_DELETION_PROTOCOL
+                                </h3>
+                                <button onClick={() => setDeleteModal({ ...deleteModal, isOpen: false })} className="text-slate-500 hover:text-white"><X size={20}/></button>
+                            </div>
+
+                            <div className="p-8 space-y-6">
+                                <div className="p-4 bg-neon-red/5 border border-neon-red/20 rounded text-[10px] text-neon-red uppercase tracking-widest leading-relaxed">
+                                    <span className="font-black">XƏBƏRDARLIQ:</span> Bu istifadəçi sistemdən kənarlaşdırılacaq və "Silinmişlər" bazasına köçürüləcək.
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Silinmə Səbəbi</label>
+                                    <textarea 
+                                        autoFocus
+                                        value={deleteModal.reason}
+                                        onChange={(e) => setDeleteModal({ ...deleteModal, reason: e.target.value })}
+                                        className="w-full h-32 bg-slate-900/80 border border-slate-800 rounded p-4 text-white text-xs focus:outline-none focus:border-neon-red transition-all resize-none"
+                                        placeholder="Məsələn: Qayda pozuntusu, saxta məlumat və s..."
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="p-8 bg-slate-900/50 border-t border-cyber-border flex justify-end space-x-4">
+                                <button 
+                                    onClick={() => setDeleteModal({ ...deleteModal, isOpen: false })}
+                                    className="px-6 py-3 border border-slate-700 text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded hover:bg-white/5 transition-all"
+                                >
+                                    Ləğv Et
+                                </button>
+                                <button 
+                                    onClick={handleDeleteUser}
+                                    disabled={!deleteModal.reason.trim() || deleteModal.isDeleting}
+                                    className={`px-6 py-3 bg-neon-red text-white text-[10px] font-bold uppercase tracking-widest rounded transition-all flex items-center ${(!deleteModal.reason.trim() || deleteModal.isDeleting) ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-[0_0_15px_rgba(255,51,51,0.5)]'}`}
+                                >
+                                    {deleteModal.isDeleting ? <Loader2 size={14} className="animate-spin mr-2" /> : null}
+                                    {deleteModal.isDeleting ? 'Silinir...' : 'Təsdiqlə və Sil'}
+                                </button>
                             </div>
                         </div>
                     </div>

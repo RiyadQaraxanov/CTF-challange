@@ -1,9 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import anime from 'animejs/lib/anime.es.js';
 import { ShieldAlert, ShieldCheck } from 'lucide-react';
+import { useScrollParallax } from '../hooks/useScrollParallax';
 
 const Concept = () => {
     const sectionRef = useRef(null);
+    const titleRef = useRef(null);
+    const blueCardRef = useRef(null);
+    const redCardRef = useRef(null);
+
+    useScrollParallax(titleRef, 0.05);
+    useScrollParallax(blueCardRef, 0.08);
+    useScrollParallax(redCardRef, 0.12);
 
     useEffect(() => {
         const observer = new IntersectionObserver((entries) => {
@@ -26,7 +34,7 @@ const Concept = () => {
 
     return (
         <section id="concept" ref={sectionRef} className="py-24 px-6 bg-cyber-card/30 border-y border-cyber-border/50">
-            <div className="max-w-7xl mx-auto text-center mb-16">
+            <div ref={titleRef} className="max-w-7xl mx-auto text-center mb-16 will-change-transform">
                 <h2 className="text-4xl md:text-5xl tracking-tighter concept-reveal font-extrabold mb-4 uppercase">
                     RED TEAM <span className="text-neon-red">VS</span> BLUE TEAM
                 </h2>
@@ -35,7 +43,7 @@ const Concept = () => {
 
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 text-left">
                 {/* BLUE TEAM CARD */}
-                <div className="concept-card bg-cyber-card p-10 relative overflow-hidden group border border-cyber-border hover:border-neon-blue transition-all duration-500 rounded-2xl">
+                <div ref={blueCardRef} className="concept-card bg-cyber-card p-10 relative overflow-hidden group border border-cyber-border hover:border-neon-blue transition-all duration-500 rounded-2xl will-change-transform">
                     <div className="absolute top-0 right-0 p-8 text-neon-blue/10 group-hover:text-neon-blue/20 transition-colors">
                         <ShieldCheck size={200} />
                     </div>
@@ -57,7 +65,7 @@ const Concept = () => {
                 </div>
 
                 {/* RED TEAM CARD */}
-                <div className="concept-card bg-cyber-card p-10 relative overflow-hidden group border border-cyber-border hover:border-neon-red transition-all duration-500 rounded-2xl">
+                <div ref={redCardRef} className="concept-card bg-cyber-card p-10 relative overflow-hidden group border border-cyber-border hover:border-neon-red transition-all duration-500 rounded-2xl will-change-transform">
                     <div className="absolute top-0 right-0 p-8 text-neon-red/10 group-hover:text-neon-red/20 transition-colors">
                         <ShieldAlert size={200} />
                     </div>

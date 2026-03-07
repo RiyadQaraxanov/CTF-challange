@@ -12,7 +12,9 @@ import Footer from './components/Footer';
 import Background from './components/Background';
 import Register from './components/Register';
 import LegalPage from './components/LegalPage';
-import AdminPanel from './components/AdminPanel';
+import AdminPanel from './pages/AdminPanel';
+import AdminLogin from './pages/AdminLogin';
+import DeletedUsers from './pages/DeletedUsers';
 import PageLogger from './components/PageLogger';
 import DiscordHandler from './components/DiscordHandler';
 
@@ -50,6 +52,8 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/legal/:type" element={<LegalPage />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/deleted-users" element={<DeletedUsers />} />
         </Routes>
       </div>
     </Router>
