@@ -12,6 +12,7 @@ const Register = () => {
         team: 'blue'
     });
     const [status, setStatus] = useState('idle'); // idle, submitting, success, error
+    const [errorMessage, setErrorMessage] = useState('');
     const formRef = useRef(null);
 
     useEffect(() => {
@@ -47,8 +48,19 @@ const Register = () => {
             });
         } catch (err) {
             console.error(err);
+            let rawMsg = err.response?.data?.message;
+            if (Array.isArray(rawMsg)) {
+                rawMsg = rawMsg[0];
+            }
+            if (!rawMsg || rawMsg.toLowerCase().includes('server error')) {
+                rawMsg = 'artıq qeydiyyatdan keçmisiniz';
+            }
+            setErrorMessage(rawMsg);
             setStatus('error');
-            setTimeout(() => setStatus('idle'), 3000);
+            setTimeout(() => {
+                setStatus('idle');
+                setErrorMessage('');
+            }, 5000);
         }
     };
 
@@ -197,6 +209,12 @@ const Register = () => {
                                     </button>
                                 </div>
                             </div>
+
+                            {status === 'error' && (
+                                <div className="p-4 rounded-lg bg-neon-red/10 border border-neon-red/30 text-neon-red text-center text-sm font-bold uppercase">
+                                    {errorMessage}
+                                </div>
+                            )}
 
                             <button 
                                 type="submit"

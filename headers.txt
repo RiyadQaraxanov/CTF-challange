@@ -1,0 +1,19 @@
+HTTP/1.1 200 OK
+Date: Sat, 07 Mar 2026 10:38:50 GMT
+Content-Type: text/html; charset=utf-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+CF-RAY: 9d88f90f8d6166af-AMS
+Cache-Control: public, max-age=0, s-maxage=300
+etag: W/"5debd97149c504dd5ed733ab9a03ee8b"
+last-modified: Fri, 06 Mar 2026 22:50:18 UTC
+rndr-id: 887105c4-0ae6-4bf4
+strict-transport-security: max-age=315360000; includeSubdomains; preload
+vary: Accept-Encoding
+vary: Accept-Encoding
+x-content-type-options: nosniff
+CF-Cache-Status: HIT
+Age: 25
+Server: cloudflare
+alt-svc: h3=":443"; ma=86400
+

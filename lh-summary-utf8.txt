@@ -1,0 +1,18 @@
+FCP: 3.3 s
+LCP: 3.6 s
+TBT: 90 ms
+CLS: 0
+SI: 3.5 s
+Scores: performance:0.83, accessibility:0.82, best-practices:1, seo:0.9
+Network Requests: 11
+https://ctf-challange.onrender.com/ 0.45KB 0.57KB
+https://ctf-challange.onrender.com/assets/index-DB2rDkrr.js 369.55KB 116.42KB
+https://ctf-challange.onrender.com/assets/index-BINQZpnZ.css 56.24KB 8.83KB
+https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap 13.76KB 1.35KB
+https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4C_k3HqU.woff2 21.80KB 21.83KB
+https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwgknk-4.woff2 30.61KB 30.63KB
+https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C_k3HqUtEw.woff2 18.48KB 18.51KB
+https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPx7cwgknk-6nFg.woff2 11.32KB 11.35KB
+https://ctf-challange-back.onrender.com/logs 0.19KB 0.46KB
+https://ctf-challange-back.onrender.com/logs 0.00KB cached
+https://ctf-challange.onrender.com/vite.svg 1.46KB 1.12KB
