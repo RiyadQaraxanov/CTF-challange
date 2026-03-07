@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://ctf-challange-back.onrender.com',
+    baseURL: 'https://ctf-challange-back.onrender.com',
     withCredentials: true, // Crucial for sending/receiving cookies automatically
 });
 
