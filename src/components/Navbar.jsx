@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Shield, Terminal } from 'lucide-react';
+import { Menu, X, Shield, Terminal, Settings } from 'lucide-react';
+import { useAuthStore } from '../store/useAuthStore';
 
 const Navbar = () => {
+  const { isLoggedIn } = useAuthStore();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
@@ -22,18 +24,24 @@ const Navbar = () => {
     { name: 'Zaman Çizelgesi', href: '#timeline' },
     { name: 'Qaydalar', href: '#win-conditions' },
     { name: 'Qeydiyyat', href: '#register', important: true },
+    ...(isLoggedIn ? [{ name: 'Admin', href: '/admin', isRoute: true }] : []),
   ];
 
-  const handleNavClick = (e, href) => {
+  const handleNavClick = (e, link) => {
+    if (link.isRoute) {
+      navigate(link.href);
+      setIsMobileMenuOpen(false);
+      return;
+    }
     e.preventDefault();
     if (location.pathname !== '/') {
       navigate('/');
       // Wait for navigation and then scroll
       setTimeout(() => {
-        document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
+        document.querySelector(link.href)?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     } else {
-      document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
+      document.querySelector(link.href)?.scrollIntoView({ behavior: 'smooth' });
     }
     setIsMobileMenuOpen(false);
   };
@@ -54,8 +62,8 @@ const Navbar = () => {
             <a
               key={link.name}
               href={link.href}
-              className={`text-sm tracking-widest uppercase hover:text-neon-blue transition-colors ${link.important ? 'px-4 py-2 bg-neon-blue/10 border border-neon-blue rounded-md text-neon-blue' : 'text-slate-400'}`}
-              onClick={(e) => handleNavClick(e, link.href)}
+              className={`text-sm tracking-widest uppercase hover:text-neon-blue transition-colors ${link.important ? 'px-4 py-2 bg-neon-blue/10 border border-neon-blue rounded-md text-neon-blue' : link.name === 'Admin' ? 'px-4 py-2 bg-neon-red/10 border border-neon-red/30 rounded-md text-neon-red font-bold' : 'text-slate-400'}`}
+              onClick={(e) => handleNavClick(e, link)}
             >
               {link.name}
             </a>
@@ -75,8 +83,8 @@ const Navbar = () => {
             <a
               key={link.name}
               href={link.href}
-              className={`text-lg tracking-widest uppercase transition-colors ${link.important ? 'text-neon-blue font-bold px-6 py-2 border border-neon-blue rounded' : 'text-slate-300'}`}
-              onClick={(e) => handleNavClick(e, link.href)}
+              className={`text-lg tracking-widest uppercase transition-colors ${link.important ? 'text-neon-blue font-bold px-6 py-2 border border-neon-blue rounded' : link.name === 'Admin' ? 'text-neon-red font-bold px-6 py-2 border border-neon-red rounded' : 'text-slate-300'}`}
+              onClick={(e) => handleNavClick(e, link)}
             >
               {link.name}
             </a>

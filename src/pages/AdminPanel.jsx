@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
     Shield, Terminal, Users, List, LogOut, Activity, Search,
-    CheckCircle2, XCircle, ChevronLeft, ChevronRight, X, Eye, Trash2, Loader2
+    CheckCircle2, XCircle, ChevronLeft, ChevronRight, X, Eye, Trash2, Loader2, Menu
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
@@ -11,6 +11,7 @@ import { logService } from '../services/log.service';
 const AdminPanel = () => {
     const { isLoggedIn, logout, checkAuth, isLoading: authLoading } = useAuthStore();
     const [activeTab, setActiveTab] = useState('users'); // 'users' or 'logs'
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [users, setUsers] = useState([]);
     const [logs, setLogs] = useState([]);
     const [stats, setStats] = useState({ totalVisits: 0, uniqueVisitors: 0 });
@@ -124,32 +125,43 @@ const AdminPanel = () => {
     if (authLoading || !isLoggedIn) return null;
 
     return (
-        <div className="min-h-screen bg-[#020617] text-slate-300 font-mono text-xs">
+        <div className="min-h-screen bg-[#020617] text-slate-300 font-mono text-xs p-4 md:p-12">
+            {/* Backdrop for Mobile */}
+            {isMobileMenuOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <div className="fixed left-0 top-0 h-full w-20 md:w-64 bg-slate-950 border-r border-cyber-border z-50 flex flex-col">
-                <div className="p-8 border-b border-cyber-border">
+            <div className={`fixed left-0 top-0 h-full w-64 bg-slate-950 border-r border-cyber-border z-50 flex flex-col transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+                <div className="p-8 border-b border-cyber-border flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-neon-blue/10 rounded flex items-center justify-center border border-neon-blue/20">
                             <Shield className="w-5 h-5 text-neon-blue" />
                         </div>
-                        <span className="hidden md:block font-black text-white text-lg tracking-tighter uppercase">Admin<span className="text-neon-blue">_V1</span></span>
+                        <span className="font-black text-white text-lg tracking-tighter uppercase">Admin<span className="text-neon-blue">_V1</span></span>
                     </div>
+                    <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden text-slate-500 hover:text-white">
+                        <X size={20} />
+                    </button>
                 </div>
 
                 <div className="flex-1 py-10 px-4 space-y-4">
                     <button 
-                        onClick={() => setActiveTab('users')}
-                        className={`w-full flex items-center md:space-x-4 p-4 rounded transition-all ${activeTab === 'users' ? 'bg-neon-blue/5 text-neon-blue border border-neon-blue/20' : 'hover:bg-white/5 opacity-40'}`}
+                        onClick={() => { setActiveTab('users'); setIsMobileMenuOpen(false); }}
+                        className={`w-full flex items-center space-x-4 p-4 rounded transition-all ${activeTab === 'users' ? 'bg-neon-blue/5 text-neon-blue border border-neon-blue/20' : 'hover:bg-white/5 opacity-40'}`}
                     >
                         <Users size={20} />
-                        <span className="hidden md:block font-bold uppercase tracking-[0.2em]">İştirakçılar</span>
+                        <span className="font-bold uppercase tracking-[0.2em]">İştirakçılar</span>
                     </button>
                     <button 
-                        onClick={() => setActiveTab('logs')}
-                        className={`w-full flex items-center md:space-x-4 p-4 rounded transition-all ${activeTab === 'logs' ? 'bg-neon-blue/5 text-neon-blue border border-neon-blue/20' : 'hover:bg-white/5 opacity-40'}`}
+                        onClick={() => { setActiveTab('logs'); setIsMobileMenuOpen(false); }}
+                        className={`w-full flex items-center space-x-4 p-4 rounded transition-all ${activeTab === 'logs' ? 'bg-neon-blue/5 text-neon-blue border border-neon-blue/20' : 'hover:bg-white/5 opacity-40'}`}
                     >
                         <List size={20} />
-                        <span className="hidden md:block font-bold uppercase tracking-[0.2em]">Sistem Loqları</span>
+                        <span className="font-bold uppercase tracking-[0.2em]">Sistem Loqları</span>
                     </button>
                 </div>
 
@@ -165,10 +177,19 @@ const AdminPanel = () => {
             </div>
 
             {/* Main Content */}
-            <div className="ml-20 md:ml-64 p-8 md:p-12">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
-                    <div>
-                        <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-3">
+            <div className="flex-1 ml-0 md:ml-64 transition-all duration-300">
+                {/* Mobile Top Header */}
+                <div className="md:hidden flex items-center justify-between mb-8 p-4 bg-slate-950/50 backdrop-blur-md border border-cyber-border rounded-xl">
+                    <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 bg-slate-900 rounded-lg text-neon-blue border border-neon-blue/20">
+                        <Menu size={20} />
+                    </button>
+                    <span className="font-black text-white text-sm tracking-tighter uppercase">Admin<span className="text-neon-blue">_V1</span></span>
+                    <div className="w-10" /> {/* Spacer */}
+                </div>
+
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+                    <div className="w-full">
+                        <h2 className="text-xl md:text-3xl font-black text-white uppercase tracking-tighter mb-3 transition-all">
                             {activeTab === 'users' ? "{'>'} User_Database_Access" : "{'>'} System_Activity_Logs"}
                         </h2>
                         <div className="flex items-center text-[10px] text-slate-500 uppercase tracking-[.3em]">
@@ -179,7 +200,7 @@ const AdminPanel = () => {
                     {activeTab === 'users' && (
                         <Link 
                             to="/admin/deleted-users"
-                            className="flex items-center space-x-2 px-6 py-3 bg-neon-red/10 border border-neon-red/30 text-neon-red rounded hover:bg-neon-red/20 transition-all font-bold uppercase tracking-widest text-[10px]"
+                            className="flex items-center space-x-2 px-6 py-3 bg-neon-red/10 border border-neon-red/30 text-neon-red rounded hover:bg-neon-red/20 transition-all font-bold uppercase tracking-widest text-[10px] flex-shrink-0"
                         >
                             <Trash2 size={14} />
                             <span>Silinmiş İstİfadəçİlər</span>

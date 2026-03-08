@@ -65,11 +65,11 @@ const DeletedUsers = () => {
     if (authLoading || !isLoggedIn) return null;
 
     return (
-        <div className="min-h-screen bg-[#020617] text-slate-300 font-mono text-xs p-8 md:p-12">
+        <div className="min-h-screen bg-[#020617] text-slate-300 font-mono text-xs p-4 md:p-12">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-                    <div>
+                    <div className="w-full">
                         <button 
                             onClick={() => navigate('/admin')}
                             className="flex items-center text-neon-blue hover:text-white transition-colors mb-4 group"
@@ -77,7 +77,7 @@ const DeletedUsers = () => {
                             <ChevronLeft size={16} className="mr-1 group-hover:-translate-x-1 transition-transform" />
                             Geri Qayıt
                         </button>
-                        <h2 className="text-3xl font-black text-white uppercase tracking-tighter">
+                        <h2 className="text-xl md:text-3xl font-black text-white uppercase tracking-tighter">
                             {">"} Trash_Bin / Silinmiş_İstifadəçilər
                         </h2>
                     </div>

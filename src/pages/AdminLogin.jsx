@@ -62,7 +62,7 @@ const AdminLogin = () => {
                 <div className="absolute -top-2 -left-2 w-8 h-8 border-t-2 border-l-2 border-neon-blue z-20"></div>
                 <div className="absolute -bottom-2 -right-2 w-8 h-8 border-b-2 border-r-2 border-neon-red z-20"></div>
 
-                <div className="bg-cyber-card/90 backdrop-blur-xl border border-cyber-border p-10 rounded-lg shadow-[0_0_50px_rgba(0,0,0,0.5)] relative z-10 overflow-hidden">
+                <div className="bg-cyber-card/90 backdrop-blur-xl border border-cyber-border p-6 md:p-10 rounded-lg shadow-[0_0_50px_rgba(0,0,0,0.5)] relative z-10 overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-neon-blue to-neon-red"></div>
                     
                     <div className="admin-login-fade text-center mb-10">
